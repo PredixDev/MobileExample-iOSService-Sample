@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+		button { width: 200px; height: 34px; margin-top: 15px}
+		body {margin-top: 22px; font-family:Helvetica}
+		div {font-size: 10pt} 
+		</style>
+	</head>
+	<body>
+		<hr>
+		<div>
+		<p id="connectivityState" />
+		</div>
+		<div>
+		<p>This app only serves to demonstrate the vendorid example iOS client service.</p>
+		<div>
+		<hr>
+		<div><button id="getIdButton" onclick="getIdClick()">Get my device id</button></div>
+		<div><button id="clearButton" onclick="clearIdClick()">Reset Demo</button></div>
+		<div>
+		<p>My device id is:</p>
+		<p id="id"></p>
+		<script type="text/javascript">
+		//<![CDATA[
+	
+		// This function standardizes calls to the container
+		function callapi(url, method, data, onComplete) {
+			console.log("callapi: " + url);
+
+			var xmlhttp = new XMLHttpRequest();
+		
+			// handler for when the request returns the response
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+					console.log("Response status: " + xmlhttp.status);
+					console.log("Response payload: " + xmlhttp.responseText);
+					if (onComplete) {
+						onComplete(xmlhttp); 
+					}
+				}
+			};
+
+			var payload = JSON.stringify(data);
+			xmlhttp.open(method, url, true);
+			xmlhttp.setRequestHeader("Content-type","application/json;charset=UTF-8");
+			xmlhttp.send(payload);
+		}
+
+		// Calls the vendorid service to get the device's id.
+		function getIdClick(){
+		   callapi("http://pmapi/vendorid", "GET", "", function(xmlhttp) {
+		        // parse the JSON response from the vendorid service
+				var vendorData = JSON.parse(xmlhttp.response);
+				// the id is in the "vendorid" property of the returned data
+		        var vendorId = vendorData.vendorId;
+				// update the UI		        
+				document.getElementById("id").innerText = vendorId
+		   })
+		}
+		
+		// clears the id from the UI
+		function clearIdClick(){
+			document.getElementById("id").innerText = ""
+		}
+	
+		//]]>
+		</script>
+	</body>
+</html>
+
