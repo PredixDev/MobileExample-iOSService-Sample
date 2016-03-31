@@ -1,8 +1,8 @@
 ## Predix Mobile iOS Service Example
 
-This repo contains a Predix Mobile iOS service example that  demonstrates a simple native service implementation.
+This repo contains a Predix Mobile iOS service example that demonstrates a simple native service implementation.
 
-### Step 0 - Prerequisites
+### Prerequisites
 
 It is assumed you already have a Predix Mobile service installation, have installed the Predix Mobile pm command line tool, and have installed a Predix Mobile iOS Container, following the Getting Started examples for those repos.
 
@@ -26,7 +26,7 @@ It is also assumed you have a basic knowledge of mobile iOS development using XC
 
 ### Step 2 - Register the new service
 
-The `VendorIDService.swift` file contains all the code needed for the example service, however you must register the service in the container in order for it to be available to the web app. In order to do this, add a line of code to `AppDelegate`.
+The `VendorIDService.swift` file contains all the code needed for the example service, however, you must register the service in the container in order for it to be available to the web app. In order to do this, add a line of code to `AppDelegate`.
 
 In the `AppDelegate.swift` file, navigate to the `application: didFinishLaunchingWithOptions:` method. In this method, and look for a line that looks like this:
 
