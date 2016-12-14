@@ -60,7 +60,7 @@ import PredixMobileSDK
     block must be called, and it must be called only once per performRequest call. Once the requestComplete block is called, no additional 
     processing should happen in the service, and no other blocks should be called.
     **************************** */
-    static func performRequest(request : NSURLRequest, response : NSHTTPURLResponse, responseReturn : responseReturnBlock, dataReturn : dataReturnBlock, requestComplete: requestCompleteBlock)
+    static func performRequest(_ request : URLRequest, response : HTTPURLResponse, responseReturn : @escaping responseReturnBlock, dataReturn : @escaping dataReturnBlock, requestComplete: @escaping requestCompleteBlock)
     {
         
         // First let's examine the request. In this example, we're going to expect only a GET request, and the URL path should only be the serviceIdentifier
@@ -68,7 +68,7 @@ import PredixMobileSDK
         // we'll use a guard statement here just to verify the request object is valid. The HTTPMethod and URL properties of a NSURLRequest
         // are optional, and we need to ensure we're dealing with a request that contains them.
         
-        guard let url = request.URL, path = url.path, method = request.HTTPMethod else
+        guard let url = request.url else
         {
             /* ****************************
              if the request does not contain a URL or a HTTPMethod, then we return a error. We'll also return an error if the URL
@@ -82,7 +82,7 @@ import PredixMobileSDK
              the reponseReturn and requestComplete blocks for you. Once a respondWithErrorStatus method is called, the performRequest
              method should not continue processing and should always return.
             **************************** */
-            self.respondWithErrorStatus(.BadRequest, response, responseReturn, requestComplete)
+            self.respondWithErrorStatus(.badRequest, response, responseReturn, requestComplete)
             return
         }
         
@@ -104,40 +104,40 @@ import PredixMobileSDK
         
          In your own services you may want to be more lenient, simply ignoring extra path or parameters.
         **************************** */
-        if path.lowercaseString != "/\(self.serviceIdentifier)" || url.query != nil
+        if url.path.lowercased() != "/\(self.serviceIdentifier)" || url.query != nil
         {
             // In this case, if the request URL is anything other than "http://pmapi/vendorid" we're returning a 400 status code.
-            self.respondWithErrorStatus(.BadRequest, response, responseReturn, requestComplete)
+            self.respondWithErrorStatus(.badRequest, response, responseReturn, requestComplete)
             return
         }
         
         // now that we know our path is what we expect, we'll check the HTTP method. If it's anything other than "GET"
         // we'll return a standard HTTP status used in that case.
         
-        if method != "GET"
+        if request.httpMethod != "GET"
         {
             // According to the HTTP specification, a status code 405 (Method not allowed) must include an Allow header containing a list of valid methods.
             // this  demonstrates one way to accomplish this.
             let headers = ["Allow" : "GET"]
             
             // This respondWithErrorStatus overload allows additional headers to be passed that will be added to the response.
-            self.respondWithErrorStatus(HTTPStatusCode.MethodNotAllowed, response, responseReturn, requestComplete, headers)
+            self.respondWithErrorStatus(HTTPStatusCode.methodNotAllowed, response, responseReturn, requestComplete, headers)
             return
         }
         
         
         // Now we know that our path and method were correct, and we've handled error conditions, we get the device's vendor id.
-        if let vendorId = UIDevice.currentDevice().identifierForVendor
+        if let vendorId = UIDevice.current.identifierForVendor
         {
             // Let's return the vendorId as a JSON object, a dictionary that contains the key "vendorId" and the value of the id itself.
             // We could create this many ways, but here we'll use the Apple SDK's JSON serialization:
             
-            let returnDictionary = ["vendorId" :  vendorId.UUIDString]
+            let returnDictionary = ["vendorId" :  vendorId.uuidString]
             
             // NSJSONSerialization.dataWithJSONObject can throw, so we'll do this in a do/try/catch statement.
             do
             {
-                let jsonData = try NSJSONSerialization.dataWithJSONObject(returnDictionary, options: NSJSONWritingOptions(rawValue: 0))
+                let jsonData = try JSONSerialization.data(withJSONObject: returnDictionary, options: JSONSerialization.WritingOptions(rawValue: 0))
                 
                 // Now our jsonData object contains a serialized JSON dictionary ready for consumption by the caller.
                 
@@ -159,10 +159,10 @@ import PredixMobileSDK
             catch let error
             {
                 // Log the error
-                PGSDKLogger.error("\(__FUNCTION__): JSON Serialization error: \(error)")
+                Logger.error("\(#function): JSON Serialization error: \(error)")
                 
                 // And return a 500 (Internal Server Error) status code reponse.
-                self.respondWithErrorStatus(.InternalServerError, response, responseReturn, requestComplete)
+                self.respondWithErrorStatus(.internalServerError, response, responseReturn, requestComplete)
                 return
             }
         }
@@ -174,7 +174,7 @@ import PredixMobileSDK
             // Since the iOS environment should always have the identifierForVendor, it being nil is a odd error,
             // one that warrents a generic 500 (Internal Server Error) status code reponse.
             
-            self.respondWithErrorStatus(.InternalServerError, response, responseReturn, requestComplete)
+            self.respondWithErrorStatus(.internalServerError, response, responseReturn, requestComplete)
             return
         }
         

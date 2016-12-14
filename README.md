@@ -20,15 +20,15 @@ To get started, follow this documentation:
 
   b. Open your Predix Mobile container app project. 
 
-  c. In the Project Manager in left-hand pane, expand the PredixMobileReferenceApp project, then expand the PredixMobileReferenceApp group. Within that group, expand the Classes group. 
+  c. In the Project Manager in left-hand pane, expand the PredixMobileiOSApp project, then expand the PredixMobileiOSApp group. Within that group, expand the Classes group. 
 
   d. In this group, create a group called "Services". 
 
-  e. Add the file `VendorIDService.swift` to this group, either by dragging from Finder, or by using the Add Files dialog in XCode. When doing this, ensure the `VendorIDService.swift` file is copied to your project, and added to your PredixMobileReferenceApp target.
+  e. Add the file `VendorIDService.swift` to this group, either by dragging from Finder, or by using the Add Files dialog in XCode. When doing this, ensure the `VendorIDService.swift` file is copied to your project, and added to your PredixMobileiOSApp target.
 
-  f. Add a "Services" group to your PredixMobileReferenceAppTests group. 
+  f. Add a "Services" group to your PredixMobileiOSAppTests group. 
 
-  g. Add the `VendorIDServiceTests.swift` file to this group, ensuring that you copy the file, and add it to the `PredixMobileReferenceAppTests` unit testing target.
+  g. Add the `VendorIDServiceTests.swift` file to this group, ensuring that you copy the file, and add it to the `PredixMobileiOSAppTests` unit testing target.
 
 ### Step 2 - Register the new service
 
@@ -42,7 +42,7 @@ Directly after that line, add the following:
 
     PredixMobilityConfiguration.additionalBootServicesToRegister = [VendorIDService.self]
 
-This informs the iOS Predix Mobile SDK framework to load your new service when the app starts, thus making it available to your webapp.
+This informs the iOS Predix Mobile SDK framework to load your new service when the app starts, thus making it available to your webapp. As you can see, the `additionalBootServicesToRegister` property is an array that can contain a number of services.
 
 #### Step 3 - Review the code
 

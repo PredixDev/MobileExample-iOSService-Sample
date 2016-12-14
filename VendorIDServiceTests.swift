@@ -24,7 +24,7 @@ import XCTest
 
 // We need to import our app. We use the @testable attribute in order to call internal methods, which can be helpful in testing some scenarios.
 // In this simple example, we don't need to, but it's a good practice to remember.
-@testable import PredixMobileReferenceApp
+@testable import PredixMobileiOS
 
 // We also need to import the Predix Mobile SDK Framework.
 import PredixMobileSDK
@@ -52,7 +52,7 @@ class VendorIDServiceTests: XCTestCase {
 
     func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             // Put the code you want to measure the time of here.
         }
     }
@@ -71,23 +71,23 @@ class VendorIDServiceTests: XCTestCase {
         // we could just construct a hardcoded path "http://pmapi/vendorid" but if constants or configuration variables exist, it's better to use them.
         // API_SCHEME is a constant "http"
         // PredixMobilityConfiguration.API_HOST is the currently configured host, which defaults to "pmapi".
-        let path = "\(API_SCHEME)://\(PredixMobilityConfiguration.API_HOST)/vendorid"
+        let path = "\(ApiScheme)://\(PredixMobilityConfiguration.apiHostname)/vendorid"
         
         // As service calls are asyncronous this entire interaction is wrapped in an XCTest expectation, and the timeout for expectations is 20 seconds.
         // You can create new expectations and fulfill them in the testResponse and/or testData blocks.
         // let's create an expectation, that we'll fulfill in the data block when we examine the return data. This will ensure our call actually does return data.
-        let dataExpectation = self.expectationWithDescription("\(__FUNCTION__): testData closure called expectation.")
+        let dataExpectation = self.expectation(description: "\(#function): testData closure called expectation.")
 
         // serviceTester registers the service in the Service Router, executes the request, and examines the returned status code.
         // If provided the testResponse and testData blocks are be called.
         // If the service does not call requestComplete within 20 seconds, or the returned status code is not the expected status code the test will fail.
-        self.serviceTester(VendorIDService.self, path: path, expectedStatusCode: .OK, testResponse: nil, testData: { (data: NSData) -> Void in
+        self.serviceTester(VendorIDService.self, path: path, expectedStatusCode: .ok, testResponse: nil, testData: { (data: Data) -> Void in
             
             // let's de-serialize the data into our exepected dictionary.
             //  NSJSONSerialization.JSONObjectWithData can throw so we wrap this in a do/try/catch
             do
             {
-                let deserializedObj = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions(rawValue: 0))
+                let deserializedObj = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions(rawValue: 0))
                 
                 // so we have an object, but we need to ensure it's the type of object we expect. 
                 // We're expecting a dictionary with a key and value both a string, so we'll try an optional casting
@@ -98,7 +98,7 @@ class VendorIDServiceTests: XCTestCase {
                     XCTAssertNotNil(dict["vendorId"], "key \"vendorId\" not found in return dictionary: \(dict)")
                     
                     // now check that the value associated with the key matches what we expect: for this simple example service, the device's vendor id.
-                    XCTAssertEqual(dict["vendorId"], UIDevice.currentDevice().identifierForVendor!.UUIDString)
+                    XCTAssertEqual(dict["vendorId"], UIDevice.current.identifierForVendor!.uuidString)
                     
                     // Yes, the XCTAssertEqual renders the XCTAssertNotNil redundant, but in more complicated testing scenarios the messages associated
                     // with a test failure may be critical to knowing where a test failed, and debugging.
@@ -121,22 +121,22 @@ class VendorIDServiceTests: XCTestCase {
     func testBadURL_ExtraPathComponents()
     {
         // create our "bad" URL example, with additional path after the "vendorid" part. This should return a 400 (Bad Request) error
-        let path = "\(API_SCHEME)://\(PredixMobilityConfiguration.API_HOST)/vendorid/some/additional/path"
+        let path = "\(ApiScheme)://\(PredixMobilityConfiguration.apiHostname)/vendorid/some/additional/path"
         
         // now we run the service tester. Since we're expecting an error, we don't need a testData block, and in this case 
         // we don't need to examine anything extra in the testResponse block so we won't include them.
-        self.serviceTester(VendorIDService.self, path: path, expectedStatusCode: .BadRequest, testResponse: nil, testData: nil)
+        self.serviceTester(VendorIDService.self, path: path, expectedStatusCode: .badRequest, testResponse: nil, testData: nil)
     }
     
     // Tests our return status when a path contains more than we expect
     func testBadURL_Querystring()
     {
         // create our "bad" URL example, with a unnecessary query string
-        let path = "\(API_SCHEME)://\(PredixMobilityConfiguration.API_HOST)/vendorid?query=string"
+        let path = "\(ApiScheme)://\(PredixMobilityConfiguration.apiHostname)/vendorid?query=string"
         
         // now we run the service tester. Since we're expecting an error, we don't need a testData block, and in this case
         // we don't need to examine anything extra in the testResponse block so we won't include them.
-        self.serviceTester(VendorIDService.self, path: path, expectedStatusCode: .BadRequest, testResponse: nil, testData: nil)
+        self.serviceTester(VendorIDService.self, path: path, expectedStatusCode: .badRequest, testResponse: nil, testData: nil)
     }
     
     
@@ -151,21 +151,21 @@ class VendorIDServiceTests: XCTestCase {
     {
 
         // Our request url string
-        let path = "\(API_SCHEME)://\(PredixMobilityConfiguration.API_HOST)/vendorid"
+        let path = "\(ApiScheme)://\(PredixMobilityConfiguration.apiHostname)/vendorid"
 
         // create a mutable request:
-        let request = NSMutableURLRequest(URL: NSURL(string: path)!)
+        var request = URLRequest(url: URL(string: path)!)
         
         // change the HTTPMethod to POST
-        request.HTTPMethod = "POST"
+        request.httpMethod = "POST"
         
         // now we run the service tester. Since we're expecting an error, and our service only returns data when there are no errors, we 
         // don't need a testData block. But, we will include a testResponse block to ensure our headers are being added properly.
-        self.serviceTester(VendorIDService.self, request: request, expectedStatusCode: .MethodNotAllowed, testResponse: { (response: NSURLResponse) -> Void in
+        self.serviceTester(VendorIDService.self, request: request, expectedStatusCode: .methodNotAllowed, testResponse: { (response: URLResponse) -> Void in
             
             // we need to cast the reponse. We could be more defensive here by optionally casting and doing an XCTAssert if it failed...
             
-            let httpResponse = response as! NSHTTPURLResponse
+            let httpResponse = response as! HTTPURLResponse
             
             // now check that our expected "Allow" header is there, and is the value we expect.
             XCTAssertEqual(httpResponse.allHeaderFields["Allow"] as? String, "GET", "Allow header was not as expected")
