@@ -40,7 +40,7 @@ In the `AppDelegate.swift` file, navigate to the `application: didFinishLaunchin
 
 Directly after that line, add the following:
 
-    PredixMobilityConfiguration.additionalBootServicesToRegister = [VendorIDService.self]
+    PredixMobilityConfiguration.additionalBootServicesToRegister.append(VendorIDService.self)
 
 This informs the iOS Predix Mobile SDK framework to load your new service when the app starts, thus making it available to your webapp. As you can see, the `additionalBootServicesToRegister` property is an array that can contain a number of services.
 
